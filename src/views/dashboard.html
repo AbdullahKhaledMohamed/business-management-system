@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>لوحة التحكم | نظام إدارة الأعمال</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">BMS</div>
+      <nav class="nav flex-column">
+        <a class="nav-link" href="/dashboard.html" data-page="dashboard" data-roles="ADMIN,ACCOUNTANT">لوحة التحكم</a>
+        <a class="nav-link" href="/products.html" data-page="products" data-roles="ADMIN,ACCOUNTANT,INVENTORY_MANAGER">المنتجات والأصناف</a>
+        <a class="nav-link" href="/customers.html" data-page="customers" data-roles="ADMIN,ACCOUNTANT">العملاء</a>
+        <a class="nav-link" href="/sales.html" data-page="sales" data-roles="ADMIN,ACCOUNTANT">فواتير المبيعات</a>
+        <a class="nav-link" href="/expenses.html" data-page="expenses" data-roles="ADMIN,ACCOUNTANT">المصروفات</a>
+        <a class="nav-link" href="/inventory.html" data-page="inventory" data-roles="ADMIN,INVENTORY_MANAGER">حركة المخزون</a>
+      </nav>
+    </aside>
+
+    <div class="main-area">
+      <nav class="topbar d-flex align-items-center justify-content-between">
+        <span class="fw-bold">لوحة التحكم</span>
+        <div class="d-flex align-items-center gap-3">
+          <span id="userLabel" class="text-white-50 small"></span>
+          <button class="btn btn-sm btn-outline-light" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </nav>
+
+      <main class="container-fluid p-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h1 class="h4 mb-0">نظرة عامة</h1>
+          <select id="periodSelect" class="form-select w-auto">
+            <option value="today">اليوم</option>
+            <option value="this_week">هذا الأسبوع</option>
+            <option value="this_month" selected>هذا الشهر</option>
+            <option value="this_year">هذه السنة</option>
+          </select>
+        </div>
+
+        <div id="kpiRow" class="row g-3 mb-4"></div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-lg-8">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h6 mb-3">اتجاه المبيعات والربح</h2>
+                <canvas id="profitTrendChart" height="110"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-4">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h6 mb-3">المصروفات حسب التصنيف</h2>
+                <canvas id="expenseBreakdownChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="row g-3">
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h6 mb-3">الأكثر مبيعًا</h2>
+                <canvas id="topProductsChart"></canvas>
+              </div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="card h-100">
+              <div class="card-body">
+                <h2 class="h6 mb-3">المبيعات حسب الصنف</h2>
+                <canvas id="salesByCategoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/pages/dashboard.js"></script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+:root {
+  --bms-primary: #1a4d8f;
+  --bms-primary-dark: #123a6b;
+  --bms-bg: #f4f6f9;
+}
+
+body,
+html {
+  font-family: 'Cairo', 'Segoe UI', Tahoma, sans-serif;
+}
+
+.auth-body {
+  background: linear-gradient(135deg, var(--bms-bg) 0%, #e9eef5 100%);
+  min-height: 100vh;
+}
+
+.auth-wrapper {
+  min-height: 100vh;
+  padding: 1.5rem;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  border-radius: 1rem;
+}
+
+.auth-logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 0.75rem;
+  background: var(--bms-primary);
+  color: #fff;
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.5px;
+}
+
+.btn-primary {
+  background-color: var(--bms-primary);
+  border-color: var(--bms-primary);
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--bms-primary-dark);
+  border-color: var(--bms-primary-dark);
+}
+
+/* ===== هيكل التطبيق العام (Sidebar + Topbar) — من Phase 9 ===== */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+.sidebar {
+  width: 240px;
+  flex-shrink: 0;
+  background: #14223b;
+  color: #cfd8e3;
+  border-left: 1px solid #e5e9f0; /* في RTL، الحد الفاصل يكون على اليسار */
+  min-height: 100vh;
+}
+
+.sidebar-brand {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #fff;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.sidebar .nav-link {
+  color: #b8c4d6;
+  padding: 0.65rem 1.25rem;
+  border-right: 3px solid transparent;
+}
+
+.sidebar .nav-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar .nav-link.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  border-right-color: var(--bms-primary);
+  font-weight: 600;
+}
+
+.main-area {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.topbar {
+  background: var(--bms-primary);
+  color: #fff;
+  padding: 0.85rem 1.5rem;
+}
+
+.kpi-card {
+  border-radius: 0.75rem;
+  border: none;
+  color: #fff;
+}
+
+.kpi-card .kpi-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.kpi-card .kpi-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.table-actions .btn {
+  padding: 0.2rem 0.5rem;
+}
+
+/* طباعة الفاتورة: إخفاء كل حاجة غير #printableInvoice */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #printableInvoice,
+  #printableInvoice * {
+    visibility: visible;
+  }
+  #printableInvoice {
+    position: absolute;
+    inset: 0;
+    padding: 1.5rem;
+  }
+  .no-print {
+    display: none !important;
+  }
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+    width: 72px;
+  }
+  .sidebar .nav-link span.label-text {
+    display: none;
+  }
+}

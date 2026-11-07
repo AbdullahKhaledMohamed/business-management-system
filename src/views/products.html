@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المنتجات | نظام إدارة الأعمال</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">BMS</div>
+      <nav class="nav flex-column">
+        <a class="nav-link" href="/dashboard.html" data-page="dashboard" data-roles="ADMIN,ACCOUNTANT">لوحة التحكم</a>
+        <a class="nav-link" href="/products.html" data-page="products" data-roles="ADMIN,ACCOUNTANT,INVENTORY_MANAGER">المنتجات والأصناف</a>
+        <a class="nav-link" href="/customers.html" data-page="customers" data-roles="ADMIN,ACCOUNTANT">العملاء</a>
+        <a class="nav-link" href="/sales.html" data-page="sales" data-roles="ADMIN,ACCOUNTANT">فواتير المبيعات</a>
+        <a class="nav-link" href="/expenses.html" data-page="expenses" data-roles="ADMIN,ACCOUNTANT">المصروفات</a>
+        <a class="nav-link" href="/inventory.html" data-page="inventory" data-roles="ADMIN,INVENTORY_MANAGER">حركة المخزون</a>
+      </nav>
+    </aside>
+
+    <div class="main-area">
+      <nav class="topbar d-flex align-items-center justify-content-between">
+        <span class="fw-bold">المنتجات والأصناف</span>
+        <div class="d-flex align-items-center gap-3">
+          <span id="userLabel" class="text-white-50 small"></span>
+          <button class="btn btn-sm btn-outline-light" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </nav>
+
+      <main class="container-fluid p-4">
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#productsTab">المنتجات</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#categoriesTab">الأصناف</button></li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- ===== Products tab ===== -->
+          <div class="tab-pane fade show active" id="productsTab">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    <label class="form-label">بحث (الاسم / SKU)</label>
+                    <input type="text" id="productSearch" class="form-control" placeholder="اكتب للبحث..." />
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">الصنف</label>
+                    <select id="productCategoryFilter" class="form-select"><option value="">كل الأصناف</option></select>
+                  </div>
+                  <div class="col-md-3">
+                    <div class="form-check mt-4">
+                      <input class="form-check-input" type="checkbox" id="lowStockFilter" />
+                      <label class="form-check-label" for="lowStockFilter">نقص مخزون فقط</label>
+                    </div>
+                  </div>
+                  <div class="col-md-2 text-end">
+                    <button class="btn btn-primary w-100" id="addProductBtn" data-roles="ADMIN,INVENTORY_MANAGER">+ منتج جديد</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th>SKU</th><th>الاسم</th><th>الصنف</th><th>سعر البيع</th><th>الكمية</th><th>الحالة</th><th></th>
+                    </tr>
+                  </thead>
+                  <tbody id="productsTableBody"></tbody>
+                </table>
+              </div>
+              <div class="card-footer d-flex justify-content-between align-items-center" id="productsPagination"></div>
+            </div>
+          </div>
+
+          <!-- ===== Categories tab ===== -->
+          <div class="tab-pane fade" id="categoriesTab">
+            <div class="card mb-3" data-roles="ADMIN,INVENTORY_MANAGER">
+              <div class="card-body">
+                <form id="categoryForm" class="row g-2 align-items-end">
+                  <input type="hidden" id="categoryId" />
+                  <div class="col-md-4">
+                    <label class="form-label">اسم الصنف</label>
+                    <input type="text" id="categoryName" class="form-control" required />
+                  </div>
+                  <div class="col-md-5">
+                    <label class="form-label">الوصف (اختياري)</label>
+                    <input type="text" id="categoryDescription" class="form-control" />
+                  </div>
+                  <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">+ إضافة صنف</button>
+                  </div>
+                </form>
+              </div>
+            </div>
+            <div class="card">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light"><tr><th>الاسم</th><th>الوصف</th><th></th></tr></thead>
+                  <tbody id="categoriesTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- ===== Product modal (create/edit) ===== -->
+  <div class="modal fade" id="productModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <form id="productForm">
+          <div class="modal-header">
+            <h5 class="modal-title" id="productModalTitle">منتج جديد</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <input type="hidden" id="productId" />
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label">رمز المنتج (SKU)</label>
+                <input type="text" id="productSku" class="form-control" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">اسم المنتج</label>
+                <input type="text" id="productName" class="form-control" required />
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">الصنف</label>
+                <select id="productCategoryId" class="form-select" required></select>
+              </div>
+              <div class="col-md-6">
+                <label class="form-label">الحالة</label>
+                <select id="productIsActive" class="form-select">
+                  <option value="true">نشط</option>
+                  <option value="false">غير نشط</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">سعر الشراء</label>
+                <input type="number" step="0.01" min="0" id="productPurchasePrice" class="form-control" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">سعر البيع</label>
+                <input type="number" step="0.01" min="0" id="productSellingPrice" class="form-control" required />
+              </div>
+              <div class="col-md-4">
+                <label class="form-label">الحد الأدنى للمخزون</label>
+                <input type="number" min="0" id="productMinStockLevel" class="form-control" value="0" />
+              </div>
+              <div class="col-md-6" id="initialStockWrapper">
+                <label class="form-label">الرصيد الافتتاحي</label>
+                <input type="number" min="0" id="productInitialStock" class="form-control" value="0" />
+                <div class="form-text">يظهر فقط عند إنشاء منتج جديد — لا يمكن تعديل الكمية من هنا لاحقًا.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">الوصف</label>
+                <textarea id="productDescription" class="form-control" rows="2"></textarea>
+              </div>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button>
+            <button type="submit" class="btn btn-primary">حفظ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/pages/products.js"></script>
+</body>
+</html>

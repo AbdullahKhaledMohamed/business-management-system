@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>المخزون | نظام إدارة الأعمال</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.rtl.min.css" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" />
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <aside class="sidebar">
+      <div class="sidebar-brand">BMS</div>
+      <nav class="nav flex-column">
+        <a class="nav-link" href="/dashboard.html" data-page="dashboard" data-roles="ADMIN,ACCOUNTANT">لوحة التحكم</a>
+        <a class="nav-link" href="/products.html" data-page="products" data-roles="ADMIN,ACCOUNTANT,INVENTORY_MANAGER">المنتجات والأصناف</a>
+        <a class="nav-link" href="/customers.html" data-page="customers" data-roles="ADMIN,ACCOUNTANT">العملاء</a>
+        <a class="nav-link" href="/sales.html" data-page="sales" data-roles="ADMIN,ACCOUNTANT">فواتير المبيعات</a>
+        <a class="nav-link" href="/expenses.html" data-page="expenses" data-roles="ADMIN,ACCOUNTANT">المصروفات</a>
+        <a class="nav-link" href="/inventory.html" data-page="inventory" data-roles="ADMIN,INVENTORY_MANAGER">حركة المخزون</a>
+      </nav>
+    </aside>
+
+    <div class="main-area">
+      <nav class="topbar d-flex align-items-center justify-content-between">
+        <span class="fw-bold">حركة المخزون</span>
+        <div class="d-flex align-items-center gap-3">
+          <span id="userLabel" class="text-white-50 small"></span>
+          <button class="btn btn-sm btn-outline-light" id="logoutBtn">تسجيل الخروج</button>
+        </div>
+      </nav>
+
+      <main class="container-fluid p-4">
+        <ul class="nav nav-tabs mb-3">
+          <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#lowStockTab">تنبيهات نقص المخزون</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#stockInTab">إضافة مخزون (Stock-In)</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#adjustmentTab">تسوية مخزون</button></li>
+          <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#movementsTab">سجل الحركات</button></li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Low stock -->
+          <div class="tab-pane fade show active" id="lowStockTab">
+            <div class="card">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light"><tr><th>SKU</th><th>المنتج</th><th>الكمية الحالية</th><th>الحد الأدنى</th></tr></thead>
+                  <tbody id="lowStockTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stock-in -->
+          <div class="tab-pane fade" id="stockInTab">
+            <div class="card" style="max-width: 600px;">
+              <div class="card-body">
+                <form id="stockInForm">
+                  <div class="mb-3">
+                    <label class="form-label">المنتج</label>
+                    <select id="stockInProduct" class="form-select" required></select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">الكمية المضافة</label>
+                    <input type="number" min="1" id="stockInQuantity" class="form-control" required />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">ملاحظات</label>
+                    <input type="text" id="stockInNotes" class="form-control" />
+                  </div>
+                  <button type="submit" class="btn btn-primary">تأكيد الإضافة</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Adjustment -->
+          <div class="tab-pane fade" id="adjustmentTab">
+            <div class="card" style="max-width: 600px;">
+              <div class="card-body">
+                <form id="adjustmentForm">
+                  <div class="mb-3">
+                    <label class="form-label">المنتج</label>
+                    <select id="adjustmentProduct" class="form-select" required></select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">الاتجاه</label>
+                    <select id="adjustmentDirection" class="form-select">
+                      <option value="INCREASE">زيادة</option>
+                      <option value="DECREASE">نقص</option>
+                    </select>
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">الكمية</label>
+                    <input type="number" min="1" id="adjustmentQuantity" class="form-control" required />
+                  </div>
+                  <div class="mb-3">
+                    <label class="form-label">سبب التسوية (إلزامي)</label>
+                    <input type="text" id="adjustmentReason" class="form-control" required minlength="3" placeholder="مثال: تالف أثناء النقل، جرد فعلي..." />
+                  </div>
+                  <button type="submit" class="btn btn-warning">تأكيد التسوية</button>
+                </form>
+              </div>
+            </div>
+          </div>
+
+          <!-- Movements history -->
+          <div class="tab-pane fade" id="movementsTab">
+            <div class="card mb-3">
+              <div class="card-body">
+                <div class="row g-2 align-items-end">
+                  <div class="col-md-4">
+                    <label class="form-label">المنتج</label>
+                    <select id="movementProductFilter" class="form-select"><option value="">كل المنتجات</option></select>
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label">نوع الحركة</label>
+                    <select id="movementTypeFilter" class="form-select">
+                      <option value="">الكل</option>
+                      <option value="STOCK_IN">إضافة</option>
+                      <option value="SALE">بيع</option>
+                      <option value="ADJUSTMENT">تسوية</option>
+                      <option value="CANCELLATION_REVERSAL">استرجاع إلغاء</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card">
+              <div class="table-responsive">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light"><tr><th>التاريخ</th><th>المنتج</th><th>النوع</th><th>الكمية</th><th>بواسطة</th><th>ملاحظات</th></tr></thead>
+                  <tbody id="movementsTableBody"></tbody>
+                </table>
+              </div>
+              <div class="card-footer d-flex justify-content-between align-items-center" id="movementsPagination"></div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/js/api.js"></script>
+  <script src="/js/layout.js"></script>
+  <script src="/js/pages/inventory.js"></script>
+</body>
+</html>

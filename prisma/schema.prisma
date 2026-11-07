@@ -1,0 +1,242 @@
+// ===========================================================
+// Business Management System - Prisma Schema
+// Database: PostgreSQL
+// ===========================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// -------------------- ENUMS --------------------
+
+enum UserRole {
+  ADMIN
+  ACCOUNTANT
+  INVENTORY_MANAGER
+}
+
+enum InvoiceStatus {
+  DRAFT
+  CONFIRMED
+  PARTIALLY_PAID
+  PAID
+  CANCELED
+}
+
+enum MovementType {
+  STOCK_IN
+  SALE
+  ADJUSTMENT
+  CANCELLATION_REVERSAL
+  RETURN
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  BANK_TRANSFER
+  OTHER
+}
+
+// -------------------- CORE ENTITIES --------------------
+
+model User {
+  id           String   @id @default(uuid())
+  fullName     String
+  username     String   @unique
+  passwordHash String
+  role         UserRole
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  salesInvoices      SalesInvoice[]      @relation("InvoiceCreatedBy")
+  expenses           Expense[]           @relation("ExpenseCreatedBy")
+  inventoryMovements InventoryMovement[] @relation("MovementCreatedBy")
+  customerPayments   CustomerPayment[]   @relation("PaymentCreatedBy")
+  auditLogs          AuditLog[]
+
+  @@map("users")
+}
+
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  products Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id             String   @id @default(uuid())
+  sku            String   @unique
+  name           String
+  description    String?
+  categoryId     String
+  purchasePrice  Decimal  @db.Decimal(14, 2)
+  sellingPrice   Decimal  @db.Decimal(14, 2)
+  stockQuantity  Int      @default(0)
+  minStockLevel  Int      @default(0)
+  isActive       Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  category           Category            @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  saleItems          SaleItem[]
+  inventoryMovements InventoryMovement[]
+
+  @@index([categoryId])
+  @@index([stockQuantity])
+  @@map("products")
+}
+
+model Customer {
+  id        String   @id @default(uuid())
+  name      String
+  phone     String?
+  email     String?
+  address   String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  salesInvoices    SalesInvoice[]
+  customerPayments CustomerPayment[]
+
+  @@index([name])
+  @@map("customers")
+}
+
+model SalesInvoice {
+  id             String        @id @default(uuid())
+  invoiceNumber  String        @unique
+  customerId     String
+  createdByUserId String
+  status         InvoiceStatus @default(DRAFT)
+  subtotal       Decimal       @db.Decimal(14, 2)
+  discountAmount Decimal       @default(0) @db.Decimal(14, 2)
+  totalAmount    Decimal       @db.Decimal(14, 2)
+  amountPaid     Decimal       @default(0) @db.Decimal(14, 2)
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  customer         Customer          @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  createdBy        User              @relation("InvoiceCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+  items            SaleItem[]
+  customerPayments CustomerPayment[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([createdAt])
+  @@map("sales_invoices")
+}
+
+model SaleItem {
+  id             String  @id @default(uuid())
+  invoiceId      String
+  productId      String
+  quantity       Int
+  unitPrice      Decimal @db.Decimal(14, 2) // snapshot of selling price at sale time
+  unitCost       Decimal @db.Decimal(14, 2) // snapshot of purchase price at sale time (for historical COGS)
+  discountAmount Decimal @default(0) @db.Decimal(14, 2)
+  lineTotal      Decimal @db.Decimal(14, 2)
+
+  invoice SalesInvoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  product Product      @relation(fields: [productId], references: [id], onDelete: Restrict)
+
+  @@index([invoiceId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+model Expense {
+  id              String   @id @default(uuid())
+  category        String
+  description     String
+  amount          Decimal  @db.Decimal(14, 2)
+  expenseDate     DateTime
+  createdByUserId String
+  notes           String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  createdBy User @relation("ExpenseCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([category])
+  @@index([expenseDate])
+  @@map("expenses")
+}
+
+model InventoryMovement {
+  id              String       @id @default(uuid())
+  productId       String
+  movementType    MovementType
+  quantity        Int
+  referenceType   String? // e.g. "SalesInvoice", "ManualAdjustment"
+  referenceId     String?
+  notes           String?
+  createdByUserId String
+  createdAt       DateTime     @default(now())
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Restrict)
+  createdBy User    @relation("MovementCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([productId])
+  @@index([movementType])
+  @@index([createdAt])
+  @@map("inventory_movements")
+}
+
+model AuditLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  action     String
+  entityType String
+  entityId   String?
+  details    Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId])
+  @@index([createdAt])
+  @@map("audit_logs")
+}
+
+model CustomerPayment {
+  id              String        @id @default(uuid())
+  customerId      String
+  invoiceId       String?
+  amount          Decimal       @db.Decimal(14, 2)
+  paymentMethod   PaymentMethod
+  paymentDate     DateTime      @default(now())
+  createdByUserId String
+  notes           String?
+  createdAt       DateTime      @default(now())
+
+  customer  Customer      @relation(fields: [customerId], references: [id], onDelete: Restrict)
+  invoice   SalesInvoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
+  createdBy User          @relation("PaymentCreatedBy", fields: [createdByUserId], references: [id], onDelete: Restrict)
+
+  @@index([customerId])
+  @@index([invoiceId])
+  @@map("customer_payments")
+}
+
+// -------------------- APP SETTINGS (currency/locale config) --------------------
+
+model AppSetting {
+  key   String @id
+  value String
+
+  @@map("app_settings")
+}
