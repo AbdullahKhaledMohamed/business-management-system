@@ -25,7 +25,9 @@ const sessionPool = new pg.Pool({ connectionString: env.databaseUrl });
 
 export function createApp() {
   const app = express();
-
+  
+  app.set('trust proxy', 1);
+  
   // ---- Security headers ----
   app.use(helmet());
 
